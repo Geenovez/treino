@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Controle Diário de Treino — Plano 4 Semanas</title>
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --panel:#111827; /* gray-900 */
+      --muted:#94a3b8; /* slate-400 */
+      --text:#e5e7eb; /* gray-200 */
+      --accent:#22d3ee; /* cyan-400 */
+      --accent-2:#a78bfa; /* violet-400 */
+      --ok:#34d399; /* emerald-400 */
+      --warn:#fbbf24; /* amber-400 */
+      --danger:#f87171; /* red-400 */
+      --card:#0b1220; /* custom */
+      --chip:#1f2937; /* gray-800 */
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0b1020);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    header{position:sticky;top:0;z-index:10;background:rgba(15,23,42,.8);backdrop-filter:blur(6px);border-bottom:1px solid #1e293b}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{margin:0;font-size:clamp(1.1rem,2.2vw,1.6rem);font-weight:700;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:.95rem}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+    @media(min-width:880px){.grid{grid-template-columns: 320px 1fr}}
+    .card{background:linear-gradient(180deg,var(--panel),#0f1528);border:1px solid #1f2a44;border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    label{font-size:.9rem;color:var(--muted)}
+    select,input[type=date],input[type=number],input[type=text]{width:100%;padding:10px 12px;border-radius:10px;background:#0b1220;border:1px solid #25314f;color:var(--text);outline:none}
+    select:focus, input:focus, textarea:focus{border-color:var(--accent)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{appearance:none;border:1px solid #26324e;background:#0b1220;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn:hover{border-color:#2e3b5c}
+    .btn.accent{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#081017}
+    .btn.ok{background:linear-gradient(135deg,var(--ok),#60a5fa);border-color:transparent;color:#03140e}
+    .btn.warn{background:linear-gradient(135deg,var(--warn),#fb7185);border-color:transparent;color:#140a03}
+    .btn.ghost{background:transparent;border-color:#2b3a61}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .kpi .chip{background:var(--chip);border:1px solid #2a385c;border-radius:12px;padding:10px;text-align:center}
+    .kpi .chip .t{font-size:.75rem;color:var(--muted)}
+    .kpi .chip .v{font-size:1.1rem;font-weight:700}
+    table{width:100%;border-collapse:separate;border-spacing:0 10px}
+    thead th{font-weight:700;color:#cbd5e1;text-align:left;font-size:.9rem}
+    tbody tr{background:var(--card);border:1px solid #1d2642}
+    tbody td, thead th{padding:10px 12px}
+    tbody tr td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+    tbody tr td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+    .set-grid{display:flex;gap:6px;flex-wrap:wrap}
+    .set{display:inline-flex;align-items:center;gap:6px;background:#0a1426;border:1px solid #223055;padding:6px 8px;border-radius:8px}
+    .set input[type=checkbox]{transform:translateY(1px)}
+    .muted{color:var(--muted)}
+    .progress{height:10px;background:#0a1426;border:1px solid #223055;border-radius:999px;overflow:hidden}
+    .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .25s ease}
+    .sticky-actions{position:sticky;bottom:0;background:rgba(11,18,32,.85);backdrop-filter:blur(6px);border-top:1px solid #1e293b;padding:12px;margin-top:16px}
+    textarea{width:100%;min-height:80px;padding:10px 12px;border-radius:10px;background:#0b1220;border:1px solid #25314f;color:var(--text)}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#0a1426;border:1px solid #223055;color:#b6c2e1;font-size:.75rem}
+    .rest{display:flex;align-items:center;gap:8px}
+    .rest input{width:80px}
+    .mini{font-size:.85rem;color:var(--muted)}
+    .small{font-size:.8rem}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Controle Diário de Treino</h1>
+    <div class="sub">Plano de 4 semanas — acompanhamento de séries, cargas e progresso por exercício</div>
+  </div>
+</header>
+
+<main class="wrap grid">
+  <!-- Lado esquerdo: filtros e resumo -->
+  <section class="card" id="filters">
+    <h2 style="margin-top:0">Configuração do Dia</h2>
+    <div class="row">
+      <div style="flex:1 1 160px">
+        <label for="date">Data</label>
+        <input type="date" id="date" />
+      </div>
+      <div style="flex:1 1 160px">
+        <label for="workout">Treino</label>
+        <select id="workout">
+          <option value="A">A — Pernas & Glúteos</option>
+          <option value="B">B — Peito, Tríceps & Core</option>
+          <option value="C">C — Costas, Bíceps & Postura</option>
+          <option value="D">D — Corpo Inteiro & Resistência</option>
+          <option value="Descanso">Descanso ativo</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn accent" id="loadDay">Carregar/Resetar treino do dia</button>
+      <button class="btn ghost" id="copyPrev">Copiar última carga</button>
+    </div>
+
+    <div style="margin-top:16px" class="kpi">
+      <div class="chip"><div class="t">Séries concluídas</div><div class="v" id="kSeries">0</div></div>
+      <div class="chip"><div class="t">Total de séries</div><div class="v" id="kSeriesTotal">0</div></div>
+      <div class="chip"><div class="t">Progresso</div><div class="v" id="kProgress">0%</div></div>
+      <div class="chip"><div class="t">Tempo de descanso</div><div class="v"><span id="restLabel">60</span>s</div></div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label for="notes">Observações do dia</label>
+      <textarea id="notes" placeholder="Como foi o treino? Energia, dores, ajustes de técnica..."></textarea>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn ok" id="save">Salvar progresso</button>
+      <button class="btn warn" id="finish">Concluir treino</button>
+      <button class="btn ghost" id="export">Exportar JSON</button>
+    </div>
+
+    <p class="mini" style="margin-top:10px">Dados ficam salvos localmente no seu navegador (localStorage). Você pode exportar a qualquer momento.</p>
+  </section>
+
+  <!-- Lado direito: tabela de exercícios -->
+  <section class="card">
+    <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h2 style="margin:0">Exercícios do Dia</h2>
+      <span class="tag" id="weekPhase">Semana 1 — foco técnico</span>
+    </div>
+    <div class="progress" title="Progresso do treino"><div id="progressBar"></div></div>
+
+    <div id="restControls" class="row" style="margin-top:12px;align-items:center">
+      <div class="rest">
+        <label class="small">Descanso (s)</label>
+        <input type="number" id="restInput" min="15" step="5" value="60" />
+        <button class="btn" id="startRest">Iniciar descanso</button>
+        <strong id="restCountdown" aria-live="polite">—</strong>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;overflow:auto">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28%">Exercício</th>
+            <th style="width:14%">Séries</th>
+            <th style="width:14%">Reps</th>
+            <th style="width:18%">Carga (kg)</th>
+            <th>Sets</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<section class="sticky-actions wrap">
+  <div class="row" style="align-items:center;justify-content:space-between">
+    <div class="mini">Dica: marque cada set conforme conclui. Use o botão de descanso entre as séries.</div>
+    <div class="row">
+      <button class="btn" id="clearDay">Limpar dia</button>
+      <button class="btn ghost" id="helpBtn">Ajuda</button>
+    </div>
+  </div>
+</section>
+
+<!-- Modal de ajuda simples -->
+<div id="help" class="card" style="max-width:900px;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none">
+  <h3 style="margin-top:0">Como usar</h3>
+  <ol class="small">
+    <li>Escolha a <strong>data</strong> e o <strong>treino</strong> (A, B, C, D ou Descanso).</li>
+    <li>Clique em <strong>Carregar/Resetar treino do dia</strong> para montar a lista de exercícios.</li>
+    <li>Preencha <em>carga (kg)</em> se desejar e marque os <strong>sets</strong> conforme concluir.</li>
+    <li>Ajuste o <strong>descanso</strong> (segundos) e use o cronômetro entre as séries.</li>
+    <li>Escreva observações e clique em <strong>Salvar</strong>. Tudo fica no seu navegador.</li>
+    <li>Use <strong>Exportar JSON</strong> para baixar um arquivo com seu histórico.</li>
+  </ol>
+  <div class="row" style="justify-content:flex-end"><button class="btn" onclick="document.getElementById('help').style.display='none'">Fechar</button></div>
+</div>
+
+<script>
+  // --- Plano base (do seu treino de 4 semanas) ---
+  // Sets padrão = 3, reps variam (10-15). Você pode editar abaixo se quiser personalizar.
+  const PLAN = {
+    A: [
+      {name:'Agachamento no Smith', sets:3, reps:12},
+      {name:'Leg Press', sets:3, reps:10},
+      {name:'Cadeira extensora', sets:3, reps:12},
+      {name:'Cadeira flexora', sets:3, reps:12},
+      {name:'Glúteo no cabo/4 apoios', sets:3, reps:15},
+      {name:'Abdução de quadril', sets:3, reps:15},
+    ],
+    B: [
+      {name:'Supino reto com halteres', sets:3, reps:10},
+      {name:'Supino inclinado (máquina)', sets:3, reps:12},
+      {name:'Crossover/Peck Deck', sets:3, reps:15},
+      {name:'Tríceps corda (pulley)', sets:3, reps:12},
+      {name:'Mergulho no banco', sets:3, reps:10},
+      {name:'Prancha abdominal (segundos)', sets:3, reps:30},
+      {name:'Abdominal infra', sets:3, reps:15},
+    ],
+    C: [
+      {name:'Puxada frente (pegada aberta)', sets:3, reps:12},
+      {name:'Remada baixa (máquina)', sets:3, reps:10},
+      {name:'Remada unilateral halter', sets:3, reps:10},
+      {name:'Rosca direta barra', sets:3, reps:12},
+      {name:'Rosca alternada halteres', sets:3, reps:12},
+      {name:'Prancha lateral (segundos)', sets:3, reps:30},
+    ],
+    D: [
+      {name:'Agachamento livre + desenvolvimento', sets:3, reps:10},
+      {name:'Flexão de braço', sets:3, reps:12},
+      {name:'Remada curvada halteres', sets:3, reps:12},
+      {name:'Passada (afundo) alternada', sets:3, reps:10},
+      {name:'Prancha c/ elevação de perna (seg)', sets:3, reps:10},
+      {name:'Bicicleta ergométrica (minutos)', sets:1, reps:15},
+    ],
+    Descanso: [
+      {name:'Caminhada leve/alongamento', sets:1, reps:20},
+    ]
+  };
+
+  // Fases por semana (apenas rótulo visual)
+  const weekPhase = [
+    'Semana 1 — foco técnico',
+    'Semana 2 — leve/moderado',
+    'Semana 3 — +10–15% de carga',
+    'Semana 4 — consolidação'
+  ];
+
+  // Utilidades de data/semana
+  function formatDateInput(d=new Date()){return d.toISOString().slice(0,10)}
+  function getWeekIndex(dateStr){
+    // Define a semana com base na ISO week do mês corrente do usuário
+    // Simples: pega a semana do mês (1..4+), clamp em 0..3
+    const d=new Date(dateStr);
+    const first=new Date(d.getFullYear(), d.getMonth(), 1);
+    const offset=Math.floor((d.getDate()+first.getDay())/7); // 0..5
+    return Math.max(0, Math.min(3, offset));
+  }
+
+  // Persistência local
+  const KEY = 'workout-tracker-v1';
+  function loadAll(){try{ return JSON.parse(localStorage.getItem(KEY))||{} }catch(e){return {}}}
+  function saveAll(obj){localStorage.setItem(KEY, JSON.stringify(obj))}
+  function dayKey(dateStr, workout){return `${dateStr}__${workout}`}
+
+  // Estado atual
+  const state = {
+    date: formatDateInput(),
+    workout: 'A',
+    rest: 60,
+    data: loadAll()
+  }
+
+  // DOM refs
+  const $date = document.getElementById('date');
+  const $workout = document.getElementById('workout');
+  const $tbody = document.getElementById('tbody');
+  const $progressBar = document.getElementById('progressBar');
+  const $kSeries = document.getElementById('kSeries');
+  const $kSeriesTotal = document.getElementById('kSeriesTotal');
+  const $kProgress = document.getElementById('kProgress');
+  const $weekPhase = document.getElementById('weekPhase');
+  const $notes = document.getElementById('notes');
+  const $restInput = document.getElementById('restInput');
+  const $restLabel = document.getElementById('restLabel');
+  const $restCountdown = document.getElementById('restCountdown');
+
+  // Inicialização UI
+  $date.value = state.date;
+  $workout.value = state.workout;
+  $restInput.value = state.rest;
+  $restLabel.textContent = state.rest;
+  updateWeekBadge();
+  renderWorkout();
+  restoreFromStorage();
+
+  // Eventos
+  document.getElementById('loadDay').addEventListener('click', ()=>{ renderWorkout(true); restoreFromStorage(true) })
+  document.getElementById('copyPrev').addEventListener('click', copyPreviousLoads)
+  document.getElementById('save').addEventListener('click', saveToStorage)
+  document.getElementById('finish').addEventListener('click', ()=>{ saveToStorage(); alert('Treino concluído! Bom trabalho 👊') })
+  document.getElementById('export').addEventListener('click', exportJSON)
+  document.getElementById('clearDay').addEventListener('click', ()=>{ if(confirm('Limpar progresso do dia atual?')){ clearDay(); renderWorkout(true) } })
+  document.getElementById('helpBtn').addEventListener('click', ()=>{ document.getElementById('help').style.display='block' })
+  $date.addEventListener('change', ()=>{ state.date=$date.value; updateWeekBadge(); renderWorkout(); restoreFromStorage();})
+  $workout.addEventListener('change', ()=>{ state.workout=$workout.value; renderWorkout(); restoreFromStorage();})
+  $restInput.addEventListener('input', ()=>{ state.rest = Math.max(15, Number($restInput.value||60)); $restLabel.textContent = state.rest })
+  document.getElementById('startRest').addEventListener('click', startRest)
+
+  function updateWeekBadge(){
+    const idx = getWeekIndex(state.date);
+    $weekPhase.textContent = weekPhase[idx] || weekPhase[0];
+  }
+
+  function renderWorkout(reset=false){
+    const plan = PLAN[state.workout] || [];
+    $tbody.innerHTML = '';
+    plan.forEach((ex,i)=>{
+      const tr = document.createElement('tr');
+      const id = `ex-${i}`;
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight:700">${ex.name}</div>
+          <div class="mini muted">Dica: execute com controle; respiração coordenada</div>
+        </td>
+        <td><input type="number" min="1" step="1" value="${ex.sets}" data-field="sets" data-idx="${i}" /></td>
+        <td><input type="number" min="1" step="1" value="${ex.reps}" data-field="reps" data-idx="${i}" /></td>
+        <td><input type="number" min="0" step="0.5" placeholder="kg" data-field="load" data-idx="${i}" /></td>
+        <td>
+          <div class="set-grid" id="${id}"></div>
+        </td>
+      `;
+      $tbody.appendChild(tr);
+    });
+    // Monta sets
+    updateSetsUI();
+    // Bind inputs
+    $tbody.querySelectorAll('input[data-field]').forEach(inp=>{
+      inp.addEventListener('input', onFieldChange)
+    });
+    updateProgress();
+  }
+
+  function updateSetsUI(){
+    const rows = [...$tbody.querySelectorAll('tr')];
+    rows.forEach((tr, i)=>{
+      const sets = Number(tr.querySelector('input[data-field="sets"]').value||3);
+      const grid = tr.querySelector('.set-grid');
+      grid.innerHTML = '';
+      for(let s=1; s<=sets; s++){
+        const div = document.createElement('label');
+        div.className='set';
+        div.innerHTML = `<input type="checkbox" data-type="set" data-idx="${i}" data-set="${s}" /> <span>Set ${s}</span>`;
+        grid.appendChild(div);
+      }
+      // restaurar marcações se houver
+      const saved = getCurrentDay();
+      if(saved && saved.exercises && saved.exercises[i] && saved.exercises[i].done){
+        const done = new Set(saved.exercises[i].done);
+        grid.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+          const s = Number(cb.getAttribute('data-set'))
+          cb.checked = done.has(s)
+        })
+      }
+      grid.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change', ()=>{ updateProgress(); }))
+    })
+  }
+
+  function onFieldChange(e){
+    const idx = Number(e.target.getAttribute('data-idx'));
+    const field = e.target.getAttribute('data-field');
+    // se mudar número de séries, reconstruir checkboxes
+    if(field==='sets'){ updateSetsUI() }
+    updateProgress();
+  }
+
+  function getTotals(){
+    const rows = [...$tbody.querySelectorAll('tr')];
+    let totalSets=0, done=0;
+    rows.forEach(tr=>{
+      const sets = Number(tr.querySelector('input[data-field="sets"]').value||3);
+      totalSets += sets;
+      tr.querySelectorAll('input[type=checkbox]').forEach(cb=>{ if(cb.checked) done++ })
+    })
+    return {totalSets, done}
+  }
+
+  function updateProgress(){
+    const {totalSets, done} = getTotals();
+    const pct = totalSets? Math.round((done/totalSets)*100): 0;
+    $kSeries.textContent = String(done);
+    $kSeriesTotal.textContent = String(totalSets);
+    $kProgress.textContent = pct + '%';
+    $progressBar.style.width = pct + '%';
+  }
+
+  function getCurrentDay(){
+    const all = loadAll();
+    return all[dayKey(state.date, state.workout)] || null;
+  }
+
+  function restoreFromStorage(alertIfFresh=false){
+    const saved = getCurrentDay();
+    if(!saved){ if(alertIfFresh) alert('Novo treino do dia criado.'); return }
+    // restaurar campos
+    $notes.value = saved.notes || '';
+    const rows = [...$tbody.querySelectorAll('tr')];
+    rows.forEach((tr,i)=>{
+      const e = saved.exercises?.[i];
+      if(!e) return;
+      const setsInp = tr.querySelector('input[data-field="sets"]').value = e.sets || 3;
+      const repsInp = tr.querySelector('input[data-field="reps"]').value = e.reps || 10;
+      const loadInp = tr.querySelector('input[data-field="load"]').value = e.load ?? '';
+    })
+    updateSetsUI();
+    // Marcar sets concluídos
+    const rows2 = [...$tbody.querySelectorAll('tr')];
+    rows2.forEach((tr,i)=>{
+      const done = new Set(saved.exercises?.[i]?.done || []);
+      tr.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+        const s = Number(cb.getAttribute('data-set'));
+        cb.checked = done.has(s)
+      })
+    })
+    updateProgress();
+  }
+
+  function collectDay(){
+    const rows = [...$tbody.querySelectorAll('tr')];
+    const exercises = rows.map((tr)=>{
+      const name = tr.querySelector('td div[style*="font-weight"]').textContent.trim();
+      const sets = Number(tr.querySelector('input[data-field="sets"]').value||3);
+      const reps = Number(tr.querySelector('input[data-field="reps"]').value||10);
+      const load = tr.querySelector('input[data-field="load"]').value;
+      const done = [...tr.querySelectorAll('input[type=checkbox]')]
+        .filter(cb=>cb.checked).map(cb=>Number(cb.getAttribute('data-set')));
+      return {name, sets, reps, load: (load===''? null : Number(load)), done}
+    })
+    return {
+      date: state.date,
+      workout: state.workout,
+      rest: state.rest,
+      notes: $notes.value.trim(),
+      exercises
+    }
+  }
+
+  function saveToStorage(){
+    const all = loadAll();
+    all[dayKey(state.date, state.workout)] = collectDay();
+    saveAll(all);
+    updateProgress();
+    // feedback leve
+    const btn = document.getElementById('save');
+    btn.textContent = 'Salvo ✔';
+    setTimeout(()=>btn.textContent='Salvar progresso',800)
+  }
+
+  function clearDay(){
+    const all = loadAll();
+    delete all[dayKey(state.date, state.workout)];
+    saveAll(all);
+    $notes.value='';
+    $tbody.querySelectorAll('input').forEach(i=>{ if(i.type==='checkbox'){i.checked=false}else{i.value=i.getAttribute('value')||''} })
+    updateSetsUI();
+    updateProgress();
+  }
+
+  function exportJSON(){
+    const data = loadAll();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='treinos-historico.json'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyPreviousLoads(){
+    // Procura último registro do mesmo exercício com carga preenchida
+    const all = loadAll();
+    const keys = Object.keys(all).filter(k=>k.endsWith(`__${state.workout}`)).sort();
+    if(!keys.length){ alert('Sem histórico para copiar.'); return }
+    const last = all[keys[keys.length-1]];
+    if(!last){ alert('Sem histórico para copiar.'); return }
+    const rows = [...$tbody.querySelectorAll('tr')];
+    rows.forEach((tr,i)=>{
+      const prev = last.exercises?.[i];
+      if(prev && prev.load!=null){
+        const loadInp = tr.querySelector('input[data-field="load"]');
+        loadInp.value = prev.load;
+      }
+    })
+  }
+
+  // Descanso simples com contagem regressiva
+  let restTimer = null, restLeft=0;
+  function startRest(){
+    if(restTimer){ clearInterval(restTimer); restTimer=null }
+    restLeft = Math.max(5, Number($restInput.value||60));
+    $restCountdown.textContent = restLeft + 's';
+    restTimer = setInterval(()=>{
+      restLeft--; $restCountdown.textContent = restLeft + 's';
+      if(restLeft<=0){ clearInterval(restTimer); restTimer=null; $restCountdown.textContent='✓'; }
+    },1000)
+  }
+</script>
+</body>
+</html>
